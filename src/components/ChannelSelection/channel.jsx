@@ -12,12 +12,14 @@ class Channel extends React.Component {
     }
 
     render() { 
-        return <div 
-            className={this.state.channelStyle}
-            onMouseOver={() => this.setChannelStyle(true)}
-            onMouseOut={() => this.setChannelStyle(false)}>
-                <h6 className={'channelText'}>{this.props.name}</h6>
-        </div>;
+        return (
+        <div 
+        className={this.state.channelStyle}
+        onMouseOver={() => this.setChannelStyle(true)}
+        onMouseOut={() => this.setChannelStyle(false)}
+        onClick={() => this.props.onClick(this.props.id)}>
+            <h6 className={'channelText'}>{this.props.name}</h6>
+        </div>);
     }
 
     setChannelStyle = (mouseIn) => {

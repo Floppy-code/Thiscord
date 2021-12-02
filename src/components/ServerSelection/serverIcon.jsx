@@ -1,11 +1,7 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-// import React, { Component } from 'react';
-// import React, { useState } from 'react';
+import React, { Component } from 'react';
 
 import '../components.css';
 import 'bootstrap/dist/css/bootstrap.css';
-
 
 class ServerIcon extends React.Component {
     state = {
@@ -23,7 +19,8 @@ class ServerIcon extends React.Component {
             ref = {this.reference}
             className = {'serverSelection'}
             onMouseEnter={() => this.setIsOnIcon(true)}
-            onMouseLeave={() => this.setIsOnIcon(false)}>
+            onMouseLeave={() => this.setIsOnIcon(false)}
+            onClick={() => this.props.onClick(this.props.id)}>
                 {this.getInfoBox()}
                 <img style={this.getImageStyle()} 
                 src={this.props.pictureUrl}/>
@@ -58,7 +55,7 @@ class ServerIcon extends React.Component {
             return (
                 <span className="btn btn-primary btn-sm"
                 style = {style}>
-                    SERVER NAME
+                    {this.props.name}
                 </span>
             );
         }
