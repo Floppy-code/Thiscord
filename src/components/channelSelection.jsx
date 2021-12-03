@@ -12,9 +12,11 @@ class ChannelSelection extends React.Component {
     render() { 
         return (
             <div className={'mainChannelSelection'}>
+                {/*Server name holder.*/}
                 <ServerInfoBar
-                serverName = {this.props.currentServerName}
+                serverName = {this.getServerNameFromID(this.props.serverID)}
                 />
+                {/*Holder for all available server channels.*/}
                 <ChannelHolder 
                 channels = {this.props.channels}
                 sizeX = {this.props.sizeX}
@@ -25,8 +27,9 @@ class ChannelSelection extends React.Component {
         );
     }
 
-    handleMouseScrool = () => {
-        //TODO
+    getServerNameFromID = (serverID) => {
+        //TODO - Connection to DB
+        return "SERVER NAME: " + serverID;
     }
 }
  
