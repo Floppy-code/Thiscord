@@ -98,7 +98,6 @@
 .chatWindow {
     flex-grow: 1;
     height: auto;
-    overflow: hidden;
     max-height: 100vh;
 }
 
@@ -109,9 +108,15 @@
     padding-left: 10px;
     padding-top: 5px;
     display: flex;
+    flex: 1;
     justify-content: center;
     align-content: center;
     flex-direction: column;
+}
+
+.chatWindowMessagesContainer {
+    overflow: hidden;
+    height: 50px;
 }
 
 .chatWindowMessage {
@@ -146,6 +151,15 @@
 .chatWindowMessageText {
     margin-top: -20px;
     padding: 10px;
+}
+
+.chatWindowInputHolder {
+    position: relative;
+    background-color: #2b2b2b;
+    height: 58px;
+    padding: 10px;
+    width: auto;
+    bottom: 0;
 }
 
 .friendsWindowHolder {

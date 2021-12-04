@@ -71,6 +71,8 @@ class MainHolder extends React.Component {
                     userID={this.state.currentUserID}
                     serverID={this.state.currentServerID}
                     channelID={this.state.currentChannelID}
+                    sizeY={this.state.currentWindowHeight}
+                    onMessageSent={this.handleMessageSent}
                 />
                 {/*Friends window*/}
                 <FriendsWindow/>
@@ -122,6 +124,10 @@ class MainHolder extends React.Component {
         //Channel was changed. Load comments from this channel.
         console.log('Clicked', selectedChannelID);
         this.setState({currentChannelID: selectedChannelID});
+    }
+
+    handleMessageSent = (messageText) => {
+        console.log('Msg handled:', messageText);
     }
 }
  

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { ReactDOM } from 'react';
 import ChatMessage from './chatMessage';
 
 class ChatWindow extends React.Component {
@@ -6,7 +7,7 @@ class ChatWindow extends React.Component {
         loadedMessages: []
     }
 
-    componentDidMount(prevProps, prevState) {
+    componentDidMount() {
         this.getAvailableMessages();
     }
 
@@ -21,6 +22,11 @@ class ChatWindow extends React.Component {
 
     render() { 
         console.log('Loaded: ' + this.state.loadedMessages.length);
+        const chatMessagesStyle = {
+            overflow: 'auto',
+            height: this.props.sizeY - 108,
+        }
+
         return (
             <div className={'chatWindow'}>
                 {/*Channel name bar.*/}
@@ -29,19 +35,25 @@ class ChatWindow extends React.Component {
                 </div>
                 
                 {/*Messages inside current channel.*/}
-                {/*TODO: Fix ugly scrollbars!*/}
-                {this.state.loadedMessages.map(msg =>
-                    <ChatMessage
-                    key={msg.messageID}
-                    messageID={msg.messageID}/>
-                )}
+                <div style = {chatMessagesStyle}>
+                    {/*TODO: Fix ugly scrollbars!*/}
+                    {this.state.loadedMessages.map(msg =>
+                        <ChatMessage
+                        key={msg.messageID}
+                        messageID={msg.messageID}/>
+                    )}  
+                </div>
+
+                {/*Chat input window.*/}
+                <ChatInput
+                onMessageSent={this.props.onMessageSent}/>
             </div>
         );
     }
 
     getAvailableMessages = () => {
         const current = [];
-        for (let i = 0; i < 2; i++) {
+        for (let i = 0; i < 50; i++) {
             current.push({messageID: i})
         }
         this.setState({loadedMessages: current})
@@ -57,6 +69,40 @@ export default ChatWindow;
 
 class ChatInput extends React.Component {
     render() { 
-        return <div></div>;
+        return (
+        <div className={'chatWindowInputHolder'}>
+            <div class="input-group input-group-sm mb-3" style={{width: '90%', float: 'left'}}>
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="inputGroup-sizing-sm">Small</span>
+                </div>
+                <input 
+                type="text" 
+                class="form-control" 
+                aria-label="Small" 
+                aria-describedby="inputGroup-sizing-sm"
+                onKeyDown={e => this.handleEnter(e)}
+                id='main-msg-input'
+                />
+            </div>
+            <div class="input-group" style={{width: '10%'}}>
+                <div class="custom-file">
+                    <input type="file" class="custom-file-input" id="inputGroupFile04"></input>
+                    <label class="custom-file-label" for="inputGroupFile04">Choose file</label>
+                </div>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="button">Button</button>
+                </div>
+            </div>
+        </div>
+        );
+    }
+
+    handleEnter = (event) => {
+        const input = document.getElementById('main-msg-input');
+        
+        if (event.key === 'Enter' && input.value !== '') {
+            this.props.onMessageSent(input.value);
+            input.value='';
+        }
     }
 }
