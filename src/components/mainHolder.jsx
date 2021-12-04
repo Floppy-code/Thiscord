@@ -3,6 +3,7 @@ import ServerSelectionBar from './serverSelection';
 import ChannelSelection from './channelSelection';
 import ChatWindow from './ChatWindow/chatWindow';
 import FriendsWindow from './FriendSelection/friendsWindow';
+import MenuHolder from './Menus/menuHolder';
 
 import './components.css';
 
@@ -15,6 +16,8 @@ class MainHolder extends React.Component {
         currentUserID: 0,
         currentServerID: 0,
         currentChannelID: 0,
+        isMenuShown: true,
+        menuType: 5
     }
 
     componentDidMount() {
@@ -47,12 +50,18 @@ class MainHolder extends React.Component {
     }
 
     render() { 
+        {/*Show menu if its supposed to be shown and ignore the rest.*/}
+        if (this.state.isMenuShown) {
+            return this.getMenu();
+        }
+
         return (
             <div className={'mainBackground'}>
                 {/*Leftside server selection bar*/}
                 <ServerSelectionBar 
                     servers={this.state.availableServers}
                     onServerClick={this.handleServerSelected}
+                    onMenuShow={this.handleShowMenu}
                     sizeX={this.state.currentWindowWidth}
                     sizeY={this.state.currentWindowHeight}
                 />
@@ -73,6 +82,7 @@ class MainHolder extends React.Component {
                     channelID={this.state.currentChannelID}
                     sizeY={this.state.currentWindowHeight}
                     onMessageSent={this.handleMessageSent}
+                    onMessageDelete={this.handleMessageDelete}
                 />
                 {/*Friends window*/}
                 <FriendsWindow/>
@@ -84,6 +94,22 @@ class MainHolder extends React.Component {
 
     updateWindowDimensions = () => {
         this.setState({currentWindowHeight: window.innerHeight, currentWindowWidth: window.innerWidth});
+    }
+
+    getMenu = () => {
+        if (this.state.isMenuShown) {
+            return (
+                <MenuHolder
+                menuType={this.state.menuType}
+                sendImageHandler={this.handleSendImage}
+                createChannelHandler={this.handleCreateChannel}
+                editChannelHandler={this.handleEditChannel}
+                createServerHandler={this.handleCreateServer}
+                loginHandler={this.handleLogin}
+                connectToServerHandler={this.handleConnectToServer}
+                />
+            );
+        }
     }
 
     setChannelServerDefaults = () => {
@@ -128,6 +154,53 @@ class MainHolder extends React.Component {
 
     handleMessageSent = (messageText) => {
         console.log('Msg handled:', messageText);
+    }
+
+    handleShowMenu = (menuType) => {
+        this.setState({isMenuShown: true, menuType: 0})
+    }
+
+    handleMessageDelete = (messageID) => {
+        
+    }
+
+    handleSendImage = () => {
+
+    }
+
+    handleCreateChannel = (name, acccessLevel) => {
+        //Controlled by the CreateChannelMenu.
+        console.log("Handled create channel:\n", name, acccessLevel);
+        this.setState({isMenuShown: false});
+    }
+
+    handleEditChannel = (newName, newAccessLevel) => {
+        //Controlled by the EditChannelMenu
+        console.log("Handled create channel:\n", newName, newAccessLevel);
+        this.setState({isMenuShown: false});
+    }
+
+    handleDeleteChannel = () => {
+        //TODO
+    }
+
+    handleCreateServer = () => {
+
+    }
+
+    handleDeleteServer = () => {
+
+    }
+
+    handleLogin = (username, password) => {
+        //Controlled by the EditChannelMenu
+        console.log("Handled create channel:\n", username, password);
+        this.setState({isMenuShown: false});
+    }
+
+    handleConnectToServer = (serverName) => {
+        console.log("Handled connect to server:\n", serverName);
+        this.setState({isMenuShown: false});
     }
 }
  

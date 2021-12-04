@@ -53,7 +53,7 @@ class ChatWindow extends React.Component {
 
     getAvailableMessages = () => {
         const current = [];
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 2; i++) {
             current.push({messageID: i})
         }
         this.setState({loadedMessages: current})
