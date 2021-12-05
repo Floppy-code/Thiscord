@@ -21,6 +21,9 @@ class MainHolder extends React.Component {
     }
 
     componentDidMount() {
+        //Calling Express backend
+        this.callBackendAPI().then(res => this.setState({ data: res.express })).catch(err => console.log(err));
+
         //Dynamic resizing event mount.
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
@@ -48,6 +51,18 @@ class MainHolder extends React.Component {
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
+
+    callBackendAPI = async () => {
+        const response = await fetch('/testing_table');
+        const body = await response.json();
+    
+        if (response.status !== 200) {
+          throw Error(body.message) 
+        } else {
+            console.log(body);
+        }
+        return body;
+      };
 
     render() { 
         {/*Show menu if its supposed to be shown and ignore the rest.*/}
