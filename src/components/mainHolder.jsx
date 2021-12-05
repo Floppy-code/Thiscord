@@ -17,7 +17,7 @@ class MainHolder extends React.Component {
         currentServerID: 0,
         currentChannelID: 0,
         isMenuShown: true,
-        menuType: 5
+        menuType: 3
     }
 
     componentDidMount() {
@@ -184,7 +184,7 @@ class MainHolder extends React.Component {
         //TODO
     }
 
-    handleCreateServer = () => {
+    handleCreateServer = (serverName, serverAvatar) => {
 
     }
 
