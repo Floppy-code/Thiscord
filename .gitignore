@@ -24,3 +24,4 @@ yarn-error.log*
 
 #Mine
 /instantclient_21_3
+/temp_files

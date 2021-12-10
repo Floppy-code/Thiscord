@@ -42,8 +42,7 @@ class ServerSelectionBar extends React.Component {
         onMouseLeave = {() => this.handleMouseOver(false)}>
             { this.state.currentlyVisible.map(server =>
             <ServerIcon
-                key={server.key}
-                id={server.key}
+                id={server.id}
                 name={server.name}
                 pictureUrl={server.pictureUrl}
                 onClick = {this.props.onServerClick}>

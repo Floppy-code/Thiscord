@@ -1,38 +1,49 @@
 import React, { Component } from 'react';
 import DropzoneComponent from '../dropzoneComponent';
+import {handlePOSTJSON, handlePOST} from '../DBRequestHandler';
 
 class CreateServerMenu extends React.Component {
+    state = {
+        fileReceived: false,
+        image: null
+    }
+
     render() { 
         return (
             <div>
-            <form>
-            <div className="form-group">
-                <label htmlFor="exampleInputEmail1">Server name</label>
-                <input type="text" className="form-control" id="serverName" aria-describedby="emailHelp" placeholder="Name"></input>
-            </div>
-            <br/>
-            <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Connect</button>
+            <form method="POST" action="/upload" enctype="multipart/form-data" onSubmit={this.formSubmit}>
+                <div className="form-group">
+                <label htmlFor="exampleInputServer">Server name</label>
+                <input type="text" name="text" className="form-control" id="serverName" aria-describedby="emailHelp" placeholder="Name"/>
+                <br/>
+                <input id='file' type="file" name="myFile" />
+                <br/>
+                <input type="submit" onClick={this.handleSubmit} value="SEND"/>
+                </div>
             </form>
-            <br/>
-            <DropzoneComponent fileHandler={this.handleFileDropped}/>
             </div>
         );
     }
 
-    handleFileDropped = (file) => {
-        console.log('Received file:', file);
-        
-        //Save to disk
-        let photo = file[0];
-        let formData = new FormData();
-
-        formData.append("photo", photo);
-        fetch('/images/', {method: "POST", body: formData});
+    formSubmit = (event) => {
+        event.preventDefault();
     }
 
-    handleSubmit = () => {
+    handleFileDropped = (input) => {
+        console.log(input);
+    }
 
-        this.props.createServerHandler();
+    handleSubmit = () => {      
+        var formdata = new FormData();    
+        formdata.append("image", this.state.image);
+        
+        var requestOptions = {
+            method: 'POST',
+            encType: "multipart/form-data",
+            file: this.state.image,
+        };
+
+        fetch("file_input", requestOptions);
     }
 }
  

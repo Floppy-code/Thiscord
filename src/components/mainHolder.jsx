@@ -4,6 +4,7 @@ import ChannelSelection from './channelSelection';
 import ChatWindow from './ChatWindow/chatWindow';
 import FriendsWindow from './FriendSelection/friendsWindow';
 import MenuHolder from './Menus/menuHolder';
+import {postData} from './DBRequestHandler.js';
 
 import './components.css';
 
@@ -13,23 +14,25 @@ class MainHolder extends React.Component {
         currentWindowWidth: 0,
         availableServers: [],
         availableChannels: [],
-        currentUserID: 0,
+        currentUserID: 8, //HARDCODED - Change later!
         currentServerID: 0,
         currentChannelID: 0,
-        isMenuShown: true,
-        menuType: 3
+        currentServerName: "",
+        currentChannelName: "",
+        isMenuShown: false,
+        menuType: -1,
     }
 
-    componentDidMount() {
-        //Calling Express backend
-        this.callBackendAPI().then(res => this.setState({ data: res.express })).catch(err => console.log(err));
+    async componentDidMount() {
+        //TESTING
+        //handlePOST('post_test', {'DataVal': 1}).then(res => {this.setState({dbResponse: res})});
 
         //Dynamic resizing event mount.
         this.updateWindowDimensions();
         window.addEventListener('resize', this.updateWindowDimensions);
 
         //Loading available servers and channels on first start.
-        this.getAvailableServers();
+        this.getAvailableServers(this.state.currentUserID);
         this.getAvailableChannels();
 
         //Setting default channel and server on first start.
@@ -38,31 +41,21 @@ class MainHolder extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         //Update servers and channels after every server/channel load.
-        if (this.state.selectedServerID !== prevState.selectedServerID) {
+        if (this.state.currentServerID !== prevState.currentServerID) {
             this.getAvailableServers();
             this.getAvailableChannels();
+            this.updateCurrentServerName();
         }
-        if (this.state.selectedChannelID !== prevState.selectedChannelID) {
+        if (this.state.currentChannelID !== prevState.currentChannelID) {
             this.getAvailableServers();
             this.getAvailableChannels();
+            this.updateCurrentChannelName();
         }
     }
 
     componentWillUnmount() {
         window.removeEventListener('resize', this.updateWindowDimensions);
     }
-
-    callBackendAPI = async () => {
-        const response = await fetch('/testing_table');
-        const body = await response.json();
-    
-        if (response.status !== 200) {
-          throw Error(body.message) 
-        } else {
-            console.log(body);
-        }
-        return body;
-      };
 
     render() { 
         {/*Show menu if its supposed to be shown and ignore the rest.*/}
@@ -84,6 +77,7 @@ class MainHolder extends React.Component {
                 {/*Middle channel selection bar*/}
                 <ChannelSelection
                     serverID={this.state.currentServerID}
+                    serverName={this.state.currentServerName}
                     channels={this.state.availableChannels}
                     onChannelClick={this.handleChannelSelected}
                     sizeX={this.state.currentWindowWidth}
@@ -91,7 +85,7 @@ class MainHolder extends React.Component {
                 />
                 {/*Middle chat window.*/}
                 <ChatWindow
-                    currentChatName={"Chat Window Name - DEBUG"}
+                    currentChatName={this.state.currentChannelName}
                     userID={this.state.currentUserID}
                     serverID={this.state.currentServerID}
                     channelID={this.state.currentChannelID}
@@ -137,38 +131,59 @@ class MainHolder extends React.Component {
         //Set default channel after server load.
     }
 
-    getAvailableServers = (userID) => {
-        //Loading all servers available to this user.
-        const current = [];
-        for (let i = 0; i < 5; i++) {
-            current.push({key: i, id: i, name: ('Server ' + i), pictureUrl: 'https://picsum.photos/200'});
-        }
-        this.setState({availableServers: current});
+    updateCurrentServerName = () => {
+        postData('server_name_from_ID', { serverID: this.state.currentServerID }).then(data => {
+            this.setState({currentServerName: data.query[0]});
+        });
     }
 
-    getAvailableChannels = (serverID) => {
-        const current = [];
-        for (let i = 0; i < 20; i++) {
-            current.push({key: i, id: i, channelName: ('Channel ' + i)});          
-        }
-        this.setState({availableChannels: current});
+    updateCurrentChannelName = () => {
+        postData('channel_name_from_ID', { channelID: this.state.currentChannelID }).then(data => {
+            this.setState({currentChannelName: data.query[0]});
+        });
+    }
+
+    getAvailableServers = () => {
+        //Loading all servers available to this user.
+        //{ id, name, pictureUrl }
+        postData('servers_for_userID', { userID: this.state.currentUserID }).then(data => {
+            const available = [];
+            data.query.map(i => available.push({id: i[0], name:i[1], pictureUrl: 'https://picsum.photos/200'}));
+            this.setState({availableServers: available});
+        });
+    }
+
+    getAvailableChannels = () => {
+        //Loading all channels available to this user.
+        //{ key, id, channelName }
+        postData('channels_for_serverID', { userID: this.state.currentUserID, serverID: this.state.currentServerID }).then( data => {
+            const available = [];
+            data.query.map(i => available.push({id: i[1], channelName: i[2]}));
+            this.setState({availableChannels: available});
+        });
+
+        // const current = [];
+        // for (let i = 0; i < 20; i++) {
+        //     current.push({key: i, id: i, channelName: ('Channel ' + i)});          
+        // }
+        // this.setState({availableChannels: current});
     }
 
     handleServerSelected = (selectedServerID) => {
         //Server was changed. Load channels from this server.
-        console.log('Clicked', selectedServerID);
         this.setState({currentServerID: selectedServerID});
-        this.setChannelDefaults();
     }
 
     handleChannelSelected = (selectedChannelID) => {
         //Channel was changed. Load comments from this channel.
-        console.log('Clicked', selectedChannelID);
         this.setState({currentChannelID: selectedChannelID});
     }
 
     handleMessageSent = (messageText) => {
         console.log('Msg handled:', messageText);
+        postData('channel_send_message', {userID: this.state.currentUserID,
+                                        channelID: this.state.currentChannelID,
+                                        text: messageText});
     }
 
     handleShowMenu = (menuType) => {
@@ -185,13 +200,11 @@ class MainHolder extends React.Component {
 
     handleCreateChannel = (name, acccessLevel) => {
         //Controlled by the CreateChannelMenu.
-        console.log("Handled create channel:\n", name, acccessLevel);
         this.setState({isMenuShown: false});
     }
 
     handleEditChannel = (newName, newAccessLevel) => {
         //Controlled by the EditChannelMenu
-        console.log("Handled create channel:\n", newName, newAccessLevel);
         this.setState({isMenuShown: false});
     }
 
@@ -200,7 +213,7 @@ class MainHolder extends React.Component {
     }
 
     handleCreateServer = (serverName, serverAvatar) => {
-
+        console.log("handle called");
     }
 
     handleDeleteServer = () => {

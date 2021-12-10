@@ -14,7 +14,7 @@ class ChannelSelection extends React.Component {
             <div className={'mainChannelSelection'}>
                 {/*Server name holder.*/}
                 <ServerInfoBar
-                serverName = {this.getServerNameFromID(this.props.serverID)}
+                serverName = {this.props.serverName}
                 />
                 {/*Holder for all available server channels.*/}
                 <ChannelHolder 
@@ -25,11 +25,6 @@ class ChannelSelection extends React.Component {
                 />
             </div>
         );
-    }
-
-    getServerNameFromID = (serverID) => {
-        //TODO - Connection to DB
-        return "SERVER NAME: " + serverID;
     }
 }
  

@@ -33,7 +33,7 @@ class MenuHolder extends React.Component {
             case 2:
                 return <EditChannelMenu editChannelHandler={this.props.editChannelHandler}/>
             case 3:
-                return <CreateServerMenu createServerHander={this.props.createServerHander}/>
+                return <CreateServerMenu createServerHandler={this.props.createServerHandler}/>
             case 4:
                 return <LoginMenu loginHandler={this.props.loginHandler}/>
             case 5:
