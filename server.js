@@ -11,6 +11,7 @@ oracledb.autoCommit = true;
 
 const { stringify } = require('querystring');
 const { BIND_OUT } = require('oracledb');
+const AqDeqOptions = require('oracledb/lib/aqDeqOptions');
 const config = {
     user: 'system',
     password: 'admin',
@@ -82,6 +83,20 @@ app.post('/messages_for_channelID', (req, res) => {
   response.then(data => res.send({ query : data.rows }));
 });
 
+//MESSAGES FOR PRIVATE CHANNEL
+//Get messages for channel with certain ID
+app.post('/messages_for_private_channelID', (req, res) => {
+  let body = req.body;
+  let query = 'select message_id, sender_id, us.avatar, us.name, date_sent, me.text from messages me\
+                join users_ us on(us.user_id = me.sender_id)\
+                where private_chat_id = ' + body.channelID + '';
+
+
+  const response = getSelect(query);
+  response.then(data => console.log( { data : data.rows } ));
+  response.then(data => res.send({ query : data.rows }));
+});
+
 //SERVER NAME FROM ID
 //Get server name from id
 app.post('/server_name_from_ID', (req, res) => {
@@ -124,6 +139,21 @@ app.post('/friends_from_id', (req, res) => {
   response.then(data => res.send({ query : data.rows }));
 });
 
+//CHANNEL ID FROM FRIEND AND USER ID
+//Gets the private channel id from user IDs
+app.post('/friends_private_channel_id', (req, res) => {
+  let body = req.body;
+  let query = 'select private_chat_id from private_chat\
+                where user_1_id = ' + body.userID + ' and user_2_id = ' + body.friendID + '\
+                or user_1_id = ' + body.friendID + ' and user_2_id = ' + body.userID + '';
+  
+  console.log(query);
+  const response = getSelect(query);
+
+  response.then(data => console.log(data));
+  response.then(data => res.send({ query : data.rows[0] }));
+});
+
 // ====================== INSERT ==========================
 //SEND MESSAGE TO CHANNEL
 app.post('/channel_send_message', (req, res) => {
@@ -152,26 +182,39 @@ app.post('/remove_friend', (req, res) => {
   response.then(res.send({query : 'success'}));
 });
 
+app.post('/remove_message_channel', (req, res) => {
+  let body = req.body;
+  let query = 'delete from messages where\
+                message_id in (select message_id from messages\
+                                join channels using(channel_id)\
+                                join servers using(server_id)\
+                                where (message_id = ' + body.messageID + ' and server_id in (select us.server_id from user_servers us\
+                                                    where user_id = ' + body.userID + ' and us.role = 1))\
+                                or (message_id = ' + body.messageID + ' and sender_id = ' + body.userID + '))';
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
+
 
 //==============================================================
 app.post("/create_server", (req, res) => {
-    console.log(req.body);
-    if (!req.files) {
-       return res.status(400).send("No files were uploaded.");
-    }
-    //Get file
-    const file = req.files.myFile;
-    const path = __dirname + "/temp_files/" + file.name;
+  console.log(req.body);
+  if (!req.files) {
+      return res.status(400).send("No files were uploaded.");
+  }
+  //Get file
+  const file = req.files.myFile;
+  const path = __dirname + "/temp_files/" + file.name;
 
-    //Save file to path
-    file.mv(path, (err) => {
-        if (err) {
-            return res.status(500).send(err);
-        }
-        return res.send({ status: "success", path: path });
-    });
+  //Save file to path
+  file.mv(path, (err) => {
+      if (err) {
+          return res.status(500).send(err);
+      }
+      return res.send({ status: "success", path: path });
+  });
 
-    //
+  //
 });
 
 //Testing POST route
