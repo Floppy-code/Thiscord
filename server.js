@@ -104,16 +104,53 @@ app.post('/channel_name_from_ID', (req, res) => {
   response.then(data => res.send({ query : data.rows[0] }));
 });
 
+//FRIENDS FROM USER ID
+//Get friends user_id and avatar
+app.post('/friends_from_id', (req, res) => {
+  let body = req.body;
+  let query = 'with\
+                ids1 as(select fr.user_id_2 from friendship fr\
+                        join users_ u2 on (u2.user_id = fr.user_id_2)\
+                        where fr.user_id_1 = ' + body.userID + '),\
+                ids2 as(select fr.user_id_1 from friendship fr\
+                        join users_ u1 on (u1.user_id = fr.user_id_1)\
+                        where fr.user_id_2 = ' + body.userID + '),\
+                combined as(select * from ids1 union select * from ids2)\
+              select us.user_id, us.name, us.avatar from users_ us\
+              where us.user_id in(select * from combined)'
+
+  const response = getSelect(query);
+  //response.then(data => console.log( { data : data.rows } ));
+  response.then(data => res.send({ query : data.rows }));
+});
+
 // ====================== INSERT ==========================
+//SEND MESSAGE TO CHANNEL
 app.post('/channel_send_message', (req, res) => {
   let body = req.body;
-  let query = 'insert into messages(sender_id, private_chat_id, channel_id, date_sent, text) values(' + body.userID + ',' + null + ',' + body.channelID + ', sysdate, \'' + body.text + '\')';
+  let query = 'insert into messages(sender_id, private_chat_id, channel_id, date_sent, text)\
+              values(' + body.userID + ',' + null + ',' + body.channelID + ', sysdate,\
+              \'' + body.text + '\')';
 
   const response = getSelect(query);
   response.then(res.send({query : 'success'}));
 });
 
+app.post('/add_friend', (req, res) => {
+  //TODO
+});
+
 // ====================== DELETE ==========================
+//REMOVE FRIEND
+app.post('/remove_friend', (req, res) => {
+  let body = req.body;
+  let query = 'delete from friendship \
+          where user_id_1 = ' + body.currentUserID + ' and user_id_2 = ' + body.friendUserID + ' or\
+          user_id_1 = ' + body.friendUserID + ' and user_id_2 = ' + body.currentUserID + '';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
 
 
 //==============================================================
