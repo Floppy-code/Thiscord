@@ -15,7 +15,7 @@ const AqDeqOptions = require('oracledb/lib/aqDeqOptions');
 const config = {
     user: 'system',
     password: 'admin',
-    connectString: '192.168.1.22:1521/xe'
+    connectString: 'localhost:1521/xe'
 }
 
 app.use(express.json());
@@ -76,7 +76,8 @@ app.post('/messages_for_channelID', (req, res) => {
   let query = 'select message_id, sender_id, us.avatar, us.name, date_sent, me.text from messages me \
                 join users_ us on(us.user_id = me.sender_id) \
                 join channels ch on(ch.channel_id = me.channel_id) \
-                where ch.channel_id = ' + body.channelID + '';
+                where ch.channel_id = ' + body.channelID + '\
+                order by date_sent';
 
   const response = getSelect(query);
   //response.then(data => console.log( { data : data.rows } ));
@@ -89,11 +90,11 @@ app.post('/messages_for_private_channelID', (req, res) => {
   let body = req.body;
   let query = 'select message_id, sender_id, us.avatar, us.name, date_sent, me.text from messages me\
                 join users_ us on(us.user_id = me.sender_id)\
-                where private_chat_id = ' + body.channelID + '';
+                where private_chat_id = ' + body.channelID + '\
+                order by date_sent';
 
 
   const response = getSelect(query);
-  response.then(data => console.log( { data : data.rows } ));
   response.then(data => res.send({ query : data.rows }));
 });
 
@@ -147,11 +148,23 @@ app.post('/friends_private_channel_id', (req, res) => {
                 where user_1_id = ' + body.userID + ' and user_2_id = ' + body.friendID + '\
                 or user_1_id = ' + body.friendID + ' and user_2_id = ' + body.userID + '';
   
-  console.log(query);
   const response = getSelect(query);
 
-  response.then(data => console.log(data));
   response.then(data => res.send({ query : data.rows[0] }));
+});
+
+app.post('/login', (req, res) => {
+  let body = req.body;
+  let query = 'select user_id from users_ where users_.name = \'' + body.username + '\' and password = \'' + body.password + '\'';
+
+  const response = getSelect(query);
+  response.then(data => {
+    if (data.rows.length === 0) {
+      res.send({ accept : -1});
+    } else {
+      res.send({ accept : data.rows[0][0] })
+    }
+  });
 });
 
 // ====================== INSERT ==========================
@@ -166,8 +179,68 @@ app.post('/channel_send_message', (req, res) => {
   response.then(res.send({query : 'success'}));
 });
 
+//SEND MESSAGE TO PRIVATE CHANNEL
+app.post('/channel_send_message_private', (req, res) => {
+  let body = req.body;
+  let query = 'insert into messages(sender_id, private_chat_id, channel_id, date_sent, text)\
+              values(' + body.userID + ',' + body.channelID + ',' + null + ', sysdate,\
+              \'' + body.text + '\')';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
+
+//ADD A CHANNEL TO SERVER
+app.post('/add_channel', (req, res) => {
+  let body = req.body;
+  let query = 'insert into channels(server_id, name)\
+                values(' + body.serverID + ', \''+ body.channelName +'\')';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
+
+//CONNECT TO ANOTHER SERVER
+app.post('/connect_to_server', (req, res) => {
+  let body = req.body;
+  let query = 'insert into user_servers\
+              values(' + body.userID + ', ' + body.serverID + ', 0, sysdate)';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
+
+//ADD FRIEND
 app.post('/add_friend', (req, res) => {
-  //TODO
+  console.log('Add friend called!');
+  let body = req.body;
+  
+  let query = 'DECLARE\
+                BEGIN\
+                    INSERT INTO friendship(user_id_1, user_id_2) select ' + body.userID + ', user_id from users_ where users_.name = \'' + body.friendUsername + '\';\
+                    INSERT INTO private_chat(user_1_id, user_2_id) select ' + body.userID + ', user_id from users_ where users_.name = \'' + body.friendUsername + '\';\
+                    COMMIT;\
+                END;';
+
+  const response = getSelect(query);
+  console.log(query);
+  response.then(data => console.log(data));
+  response.then(res.send({query : 'success'}));
+});
+
+
+// ====================== UPDATE ==========================
+app.post('/edit_channel', (req, res) => {
+  let body = req.body;
+  let query = 'update channels\
+                set channels.name = \''+ body.channelName +'\'\
+                where channel_id = ' + body.channelID + ' and ' + body.userID + ' in(select distinct user_id from user_servers\
+                join servers using(server_id)\
+                join channels using(server_id)\
+                where channel_id = ' + body.channelID + ' and user_servers.role = 1)';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
 });
 
 // ====================== DELETE ==========================
@@ -182,6 +255,7 @@ app.post('/remove_friend', (req, res) => {
   response.then(res.send({query : 'success'}));
 });
 
+//REMOVE MESSAGE FROM CHANNEL
 app.post('/remove_message_channel', (req, res) => {
   let body = req.body;
   let query = 'delete from messages where\
@@ -195,26 +269,60 @@ app.post('/remove_message_channel', (req, res) => {
   response.then(res.send({query : 'success'}));
 });
 
+//REMOVE MESSAGE FROM PRIVATE CHANNEL
+app.post('/remove_message_channel_private', (req, res) => {
+  let body = req.body;
+  let query = 'delete from messages\
+              where message_id = ' + body.messageID + ' and sender_id = ' + body.userID + '';
+  
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
+
+//DELETE CHANNEL FROM SERVER
+//[TODO] Cascade to delete all messages in channel.
+app.post('/remove_channel_from_server', (req, res) => {
+  let body = req.body;
+  let query = 'delete from channels\
+                where channel_id = ' + body.channelID + ' and ' + body.userID + ' in (select distinct user_id from user_servers\
+                  join servers using(server_id)\
+                  join channels using(server_id)\
+                  where channel_id = ' + body.channelID + ' and user_servers.role = 1)';
+
+  const response = getSelect(query);
+  response.then(res.send({query : 'success'}));
+});
 
 //==============================================================
 app.post("/create_server", (req, res) => {
-  console.log(req.body);
   if (!req.files) {
       return res.status(400).send("No files were uploaded.");
   }
+
+  let body = req.body;
+
   //Get file
   const file = req.files.myFile;
-  const path = __dirname + "/temp_files/" + file.name;
-
+  const path = "D:/temp/" + file.name;
+  console.log(body);
   //Save file to path
   file.mv(path, (err) => {
       if (err) {
           return res.status(500).send(err);
       }
-      return res.send({ status: "success", path: path });
-  });
+      let query = 'DECLARE v_blob BLOB;\
+                  BEGIN\
+                      v_blob := file_to_blob (\'TEMP_FILES\',\'' + file.name + '\');\
+                      INSERT INTO SERVERS(name, is_public, icon) VALUES (\'' + body.text + '\', 1, v_blob);\
+                      INSERT INTO USER_SERVERS select ' + body.userID + ', server_id, 1, sysdate from servers where name = \'' + body.text + '\';\
+                      COMMIT;\
+                  END;';
 
-  //
+      getSelect(query).then(data => console.log(data));
+      res.send('<head>\
+                  <meta http-equiv=\'refresh\' content=\'0; URL=http://localhost:3000/\'>\
+                </head>');
+  });
 });
 
 //Testing POST route
