@@ -30,9 +30,17 @@ class ChatWindow extends React.Component {
         return (
             <div className={'chatWindow'}>
                 {/*Channel name bar.*/}
-                <div className={'chatWindowInfoBar'}>
-                    <h5><i className="bi bi-chat-right-text"></i> {this.props.currentChatName}</h5>
+                <div className={'chatWindowInfoBar'} style={{'position' : 'relative'}}>
+                    <h5>
+                        <i className="bi bi-chat-right-text"></i> {this.props.currentChatName}
+                        <div 
+                        style={{'float' : 'right', 'paddingRight' : '10px', 'cursor' : 'pointer'}}
+                        onClick={() => this.props.onMenuShow(2)}>
+                            <i class="bi bi-pencil"/>
+                        </div>
+                    </h5>
                 </div>
+
                 
                 {/*Messages inside current channel.*/}
                 <div style = {chatMessagesStyle}>
@@ -45,6 +53,8 @@ class ChatWindow extends React.Component {
                         username={msg.username}
                         date={msg.date}
                         text={msg.text}
+                        onMessageDelete={this.onMessageDelete}
+                        onBanUser={this.props.onBanUser}
                         />
                     )}  
                 </div>
@@ -58,11 +68,26 @@ class ChatWindow extends React.Component {
     }
 
     getAvailableMessages = () => {
-        postData('messages_for_channelID', { channelID : this.props.channelID }).then(data => {
-            const messages = [];
-            data.query.map(i => messages.push({id: i[0], senderID: i[1], avatar: 'https://picsum.photos/200', username: i[3], date: i[4], text: i[5]}));
-            this.setState({loadedMessages: messages});
-        });
+        if (this.props.isChannelPrivate) {
+            postData('messages_for_private_channelID', { channelID : this.props.channelID }).then(data => {
+                const messages = [];
+                data.query.map(i => messages.push({messageID: i[0], senderID: i[1], avatar: 'https://picsum.photos/200', username: i[3], date: i[4], text: i[5]}));
+                this.setState({loadedMessages: messages});
+            });
+        } else {
+            postData('messages_for_channelID', { channelID : this.props.channelID }).then(data => {
+                const messages = [];
+                data.query.map(i => messages.push({messageID: i[0], senderID: i[1], avatar: 'https://picsum.photos/200', username: i[3], date: i[4], text: i[5]}));
+                this.setState({loadedMessages: messages});
+            });
+        }
+
+    }
+
+    onMessageDelete = (messageID) => {
+        console.log(messageID);
+        this.props.onMessageDelete(messageID);
+        this.getAvailableMessages();
     }
 
     getChatNameFromID = (channelID) => {

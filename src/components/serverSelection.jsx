@@ -47,6 +47,18 @@ class ServerSelectionBar extends React.Component {
                 pictureUrl={server.pictureUrl}
                 onClick = {this.props.onServerClick}>
             </ServerIcon>) }
+            <ServerIcon
+                id={-1}
+                name={'Create Server'}
+                pictureUrl={'https://picsum.photos/200'}
+                onClick = {() => this.props.onMenuShow(3)}
+            />
+            <ServerIcon
+                id={-2}
+                name={'Connect to server'}
+                pictureUrl={'https://picsum.photos/200'}
+                onClick = {() => this.props.onMenuShow(5)}
+            />
         </div>
         );
     }
@@ -55,7 +67,7 @@ class ServerSelectionBar extends React.Component {
         const visibleServers = [];
         const serverBtnSize = 80;
 
-        let maxVisibleCount = Math.round(this.props.sizeY / serverBtnSize);
+        let maxVisibleCount = Math.round(this.props.sizeY / serverBtnSize) - 2;
         let maxOffset = Math.min(this.props.servers.length, maxVisibleCount);
 
         if (this.state.scrollY + maxOffset > this.props.servers.length) {

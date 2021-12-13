@@ -44,6 +44,7 @@ class ChannelHolder extends React.Component {
                     id={channel.id}
                     name={channel.channelName}
                     onClick={this.props.onChannelClick}
+                    onChannelRemove={this.props.onChannelRemove}
                 />)}
             </div>
         );

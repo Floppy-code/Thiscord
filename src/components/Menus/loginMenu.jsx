@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 class LoginMenu extends React.Component {
-    render() { 
+    render() {
         return (
             <div>
                 <form>
@@ -16,14 +16,18 @@ class LoginMenu extends React.Component {
                     </div>
                     <br/>
                     <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Login</button>
+                    <br/>
+                    <br/>
+                    <button onClick={() => this.props.onMenuShow(7)} type="button" className="btn btn-primary" id='submitBtn'>Register</button>
+                    
                 </form>
             </div>);
     }
 
     handleSubmit = () => {
         const name = document.getElementById('username').value;
-        const accessLevel = document.getElementById('password').value;
-        this.props.loginHandler(name, accessLevel);
+        const password = document.getElementById('password').value;
+        this.props.loginHandler(name, password);
     }
 }
  

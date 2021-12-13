@@ -5,8 +5,8 @@ class ConnectToServerMenu extends React.Component {
         return (
             <form>
             <div className="form-group">
-                <label htmlFor="exampleInputEmail1">Server name</label>
-                <input type="text" className="form-control" id="serverName" aria-describedby="emailHelp" placeholder="Name"></input>
+                <label htmlFor="exampleInputEmail1">Server ID</label>
+                <input type="text" className="form-control" id="serverID" aria-describedby="emailHelp" placeholder="ID eg.1337"></input>
             </div>
             <br/>
             <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Connect</button>
@@ -14,7 +14,7 @@ class ConnectToServerMenu extends React.Component {
     }
 
     handleSubmit = () => {
-        const name = document.getElementById('serverName').value;
+        const name = document.getElementById('serverID').value;
         this.props.connectToServerHandler(name);
     }
 }

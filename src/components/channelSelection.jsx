@@ -15,6 +15,8 @@ class ChannelSelection extends React.Component {
                 {/*Server name holder.*/}
                 <ServerInfoBar
                 serverName = {this.props.serverName}
+                serverID = {this.props.serverID}
+                onMenuShow = {this.props.onMenuShow}
                 />
                 {/*Holder for all available server channels.*/}
                 <ChannelHolder 
@@ -22,6 +24,7 @@ class ChannelSelection extends React.Component {
                 sizeX = {this.props.sizeX}
                 sizeY = {this.props.sizeY}
                 onChannelClick = {this.props.onChannelClick}
+                onChannelRemove = {this.props.onChannelRemove}
                 />
             </div>
         );

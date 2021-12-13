@@ -7,13 +7,25 @@ class ChatMessage extends React.Component {
                 {/*Avatar, username and message time.*/}
                 <div className={'chatWindowMessageUser'}>
                     <img 
-                    src={this.getAvatarFromBase64(this.props.messageID)}
+                    src={this.getAvatarFromBase64(this.props.avatar)}
                     className={'chatWindowMessageUserImg'}/>
                     <div className={'chatWindowMessageUserUsername'}>
-                        <h5>
-                            {this.props.username}
+                        <div style={{'float' : 'left'}}>
+                            <h5>
+                                {this.props.username}
                             <h6 className="text-muted">{this.props.date}</h6>
-                        </h5>
+                            </h5>
+                        </div>
+                        <div 
+                        style={{'float' : 'right', 'cursor' : 'pointer'}}
+                        onClick={() => this.handleRemoveMessage()}>
+                            <i class="bi bi-trash"></i>
+                        </div>
+                        <div 
+                        style={{'float' : 'right', 'cursor' : 'pointer'}}
+                        onClick={() => this.props.onBanUser(this.props.senderID)}>
+                            <i class="bi bi-dash-circle"/>
+                        </div>
                     </div>
                 </div>
 
@@ -23,6 +35,10 @@ class ChatMessage extends React.Component {
                 </div>
             </div>
         );
+    }
+    
+    handleRemoveMessage = () => {
+        this.props.onMessageDelete(this.props.messageID);
     }
 
     getAvatarFromBase64 = (messageID) => {

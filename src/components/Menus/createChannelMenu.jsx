@@ -10,11 +10,6 @@ class CreateChannelMenu extends React.Component {
                     <input type="text" className="form-control" id="channelIDInput" aria-describedby="emailHelp" placeholder="Enter channel name"></input>
                 </div>
                 <br/>
-                <div className="form-group">
-                    <label htmlFor="exampleInputPassword1">Channel Access level</label>
-                    <input type="text" className="form-control" id="accessLevelInput" placeholder="Enter channel access level"></input>
-                </div>
-                <br/>
                 <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Create channel</button>
             </form>
         </div>);
@@ -22,8 +17,7 @@ class CreateChannelMenu extends React.Component {
 
     handleSubmit = () => {
         const name = document.getElementById('channelIDInput').value;
-        const accessLevel = document.getElementById('accessLevelInput').value;
-        this.props.createChannelHandler(name, accessLevel);
+        this.props.createChannelHandler(name);
     }
 }
  

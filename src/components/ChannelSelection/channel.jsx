@@ -4,7 +4,8 @@ import '../components.css';
 
 class Channel extends React.Component {
     state = {
-        channelStyle: 'channel'
+        channelStyle: 'channel',
+        toRemove: false,
     }
 
     constructor(props) {
@@ -18,9 +19,20 @@ class Channel extends React.Component {
         onMouseOver={() => this.setChannelStyle(true)}
         onMouseOut={() => this.setChannelStyle(false)}
         onClick={() => this.props.onClick(this.props.id)}>
-            <h6 className={'channelText'}>{this.props.name}</h6>
+            <div style={{'float' : 'inherit'}}>
+                <h6 className={'channelText'}>
+                    {this.props.name}
+                    <div style={{'float' : 'right', 'paddingRight' : '10px'}}>
+                        <i class="bi bi-dash-circle"
+                            onClick={() => this.props.onChannelRemove(this.props.id)}
+                        />
+                    </div>
+                </h6>
+            </div>
+
         </div>);
     }
+
 
     setChannelStyle = (mouseIn) => {
         let style = mouseIn ? 'channelMouseHover' : 'channel';

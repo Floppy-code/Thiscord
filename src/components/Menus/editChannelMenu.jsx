@@ -10,20 +10,14 @@ class EditChannelMenu extends React.Component {
                     <input type="text" className="form-control" id="channelIDInput" placeholder="Enter new channel name"></input>
                 </div>
                 <br/>
-                <div className="form-group">
-                    <label htmlFor="exampleInputPassword1">New channel access level</label>
-                    <input type="text" className="form-control" id="accessLevelInput" placeholder="Enter new channel access level"></input>
-                </div>
-                <br/>
-                <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Create channel</button>
+                <button onClick={() => this.handleSubmit()} type="button" className="btn btn-primary" id='submitBtn'>Edit channel</button>
             </form>
         </div>);
     }
 
     handleSubmit = () => {
         const name = document.getElementById('channelIDInput').value;
-        const accessLevel = document.getElementById('accessLevelInput').value;
-        this.props.editChannelHandler(name, accessLevel);
+        this.props.editChannelHandler(name);
     }
 }
  
